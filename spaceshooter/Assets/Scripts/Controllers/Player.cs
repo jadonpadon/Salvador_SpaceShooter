@@ -22,6 +22,9 @@ public class Player : MonoBehaviour
     void PlayerMovement()
     {
         float acceleration = maxSpeed / accelerationTime;
+        float deceleration = maxSpeed / decelerationTime;
+
+        Vector3 movementDirection = Vector3.zero;
 
         if (speed > maxSpeed )
         {
@@ -40,48 +43,39 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.UpArrow))
         {
             speed += acceleration * Time.deltaTime;
-            transform.position += upVel *Time.deltaTime;
+            movementDirection = Vector3.up;
         }
-        if (Input.GetKeyUp(KeyCode.UpArrow))
-        {
-            speed -= decelerationTime * Time.deltaTime;
-            transform.position += upVel * Time.deltaTime;
-        }
-
-        if (Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKey(KeyCode.DownArrow))
         {
             speed += acceleration * Time.deltaTime;
-            transform.position += downVel * Time.deltaTime;
+            movementDirection = Vector3.down;
         }
-        if(Input.GetKeyUp(KeyCode.DownArrow))
-        {
-            speed -= decelerationTime * Time.deltaTime;
-            transform.position += downVel * Time.deltaTime;
-        }
-
-        if (Input.GetKey(KeyCode.LeftArrow))
+        else if (Input.GetKey(KeyCode.LeftArrow))
         {
             speed += acceleration * Time.deltaTime;
-            transform.position += leftVel * Time.deltaTime;
+            movementDirection = Vector3.left;
         }
-        if (Input.GetKeyUp(KeyCode.LeftArrow))
-        {
-            speed -= decelerationTime * Time.deltaTime;
-            transform.position += leftVel * Time.deltaTime;
-        }
-
-        if (Input.GetKey(KeyCode.RightArrow))
+        else if (Input.GetKey(KeyCode.RightArrow))
         {
             speed += acceleration * Time.deltaTime;
-            transform.position += rightVel * Time.deltaTime;
+            movementDirection = Vector3.right;
         }
-        if (Input.GetKeyUp(KeyCode.RightArrow))
+        else
         {
             speed -= decelerationTime * Time.deltaTime;
-            transform.position += rightVel * Time.deltaTime;
         }
 
-        Debug.Log(speed);
+
+        if (speed > 0)
+        {
+            transform.position += movementDirection * speed * Time.deltaTime;
+
+            Debug.Log("Transform Position: " + transform.position);
+            Debug.Log("Speed: " + speed);
+            Debug.Log("Movement Direction: " + movementDirection);
+        }
+
+        //Debug.Log(speed);
     }
 
 }
