@@ -8,15 +8,32 @@ public class Player : MonoBehaviour
     public Transform enemyTransform;
     public GameObject bombPrefab;
     public Transform bombsTransform;
+    public GameObject powerupPrefab;
 
     public float maxSpeed;
     public float accelerationTime;
     public float decelerationTime;
     float speed;
 
+    public float radarRadius;
+    public int radarPoints;
+
+    public float powerupRadius;
+    public int numberOfPowerups;
+
     void Update()
     {
         PlayerMovement();
+        
+        if (Input.GetKey(KeyCode.R)) 
+        {
+            EnemyRadar(radarRadius, radarPoints);
+        }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            SpawnPowerups(powerupRadius, numberOfPowerups);
+        }    
     }
 
     void PlayerMovement()
@@ -24,15 +41,9 @@ public class Player : MonoBehaviour
         float acceleration = maxSpeed / accelerationTime;
         float deceleration = maxSpeed / decelerationTime;
 
-        Vector3 movementDirection = Vector3.zero;
-
         if (speed > maxSpeed )
         {
             speed = maxSpeed;
-        }
-        if (speed < 0)
-        {
-            speed = 0;
         }
 
         Vector3 upVel = new Vector3(0, speed);
@@ -43,39 +54,91 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.UpArrow))
         {
             speed += acceleration * Time.deltaTime;
-            movementDirection = Vector3.up;
+            transform.position += upVel * Time.deltaTime;
         }
-        else if (Input.GetKey(KeyCode.DownArrow))
+        if (Input.GetKey(KeyCode.DownArrow))
         {
             speed += acceleration * Time.deltaTime;
-            movementDirection = Vector3.down;
+            transform.position += downVel * Time.deltaTime;
         }
-        else if (Input.GetKey(KeyCode.LeftArrow))
+        if (Input.GetKey(KeyCode.LeftArrow))
         {
             speed += acceleration * Time.deltaTime;
-            movementDirection = Vector3.left;
+            transform.position += leftVel * Time.deltaTime;
         }
-        else if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKey(KeyCode.RightArrow))
         {
             speed += acceleration * Time.deltaTime;
-            movementDirection = Vector3.right;
-        }
-        else
-        {
-            speed -= decelerationTime * Time.deltaTime;
-        }
-
-
-        if (speed > 0)
-        {
-            transform.position += movementDirection * speed * Time.deltaTime;
-
-            Debug.Log("Transform Position: " + transform.position);
-            Debug.Log("Speed: " + speed);
-            Debug.Log("Movement Direction: " + movementDirection);
+            transform.position += rightVel * Time.deltaTime;
         }
 
         //Debug.Log(speed);
+    }
+
+    public void EnemyRadar(float radius, int circlePoints)
+    {
+        Color radarColor = Color.green;
+
+        Vector3 playerToEnemy = (enemyTransform.position - transform.position);
+        float distanceToEnemy = playerToEnemy.magnitude;
+
+        if (distanceToEnemy <= radius)
+        {
+            radarColor = Color.red;
+        }
+
+        float angle = 360f / circlePoints;
+
+        Vector3 firstPoint = Vector3.zero;
+        Vector3 previousPoint = Vector3.zero;
+
+        for (int i = 0; i < circlePoints; i++)
+        {
+            float currentAngle = i * angle * Mathf.Deg2Rad;
+
+            Vector3 currentPoint = new Vector3(transform.position.x + Mathf.Cos(currentAngle) * radius, transform.position.y + Mathf.Sin(currentAngle) * radius);
+
+            if (i > 0)
+            {
+                Debug.DrawLine(previousPoint, currentPoint, radarColor);
+            }
+            else
+            {
+                firstPoint = currentPoint;
+            }
+
+            previousPoint = currentPoint;
+        }
+
+        Debug.DrawLine(previousPoint, firstPoint, radarColor);
+    }
+
+    public void SpawnPowerups (float radius, int numberOfPowerups)
+    {
+        float angle = 360f / numberOfPowerups;
+
+        Vector3 firstPoint = Vector3.zero;
+        Vector3 previousPoint = Vector3.zero;
+
+        for (int i = 0; i < numberOfPowerups; i++)
+        {
+            float currentAngle = i * angle * Mathf.Deg2Rad;
+
+            Vector3 currentPoint = new Vector3(transform.position.x + Mathf.Cos(currentAngle) * radius, transform.position.y + Mathf.Sin(currentAngle) * radius);
+
+            if (i > 0)
+            {
+                Instantiate(powerupPrefab, currentPoint, Quaternion.identity);
+            }
+            else
+            {
+                firstPoint = currentPoint;
+            }
+
+            previousPoint = currentPoint;
+        }
+        Instantiate(powerupPrefab, firstPoint, Quaternion.identity);
+
     }
 
 }
