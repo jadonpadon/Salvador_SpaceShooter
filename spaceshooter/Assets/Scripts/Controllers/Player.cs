@@ -76,8 +76,6 @@ public class Player : MonoBehaviour
 
         bool isMoving = false;
 
-        Debug.Log(lastDirection);
-
         if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
         {
             speed += acceleration * Time.deltaTime;
