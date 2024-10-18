@@ -21,8 +21,6 @@ public class Enemy : MonoBehaviour
         Vector3 follow = enemyToPlayer * speed * Time.deltaTime;
 
         transform.position += follow;
-
-        //Debug.Log(enemyToPlayer);
     }
 
 }

@@ -132,3 +132,7 @@ MonoBehaviour:
   moveSpeed: 0.05
   arrivalDistance: 0.2
   maxFloatDistance: 2
+  miniAsteroid: {fileID: 7969683946929540427}
+  numberOfDebris: 3
+  debrisRadius: 1
+  debrisTimer: 5

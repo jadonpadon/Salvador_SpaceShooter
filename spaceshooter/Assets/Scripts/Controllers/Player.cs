@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +15,8 @@ public class Player : MonoBehaviour
     public float accelerationTime;
     public float decelerationTime;
     float speed;
+    Vector3 lastDirection = Vector3.zero;
+
 
     public float radarRadius;
     public int radarPoints;
@@ -21,9 +24,18 @@ public class Player : MonoBehaviour
     public float powerupRadius;
     public int numberOfPowerups;
 
+    public GameObject missile;
+
+    bool hasRun = false;
+
     void Update()
     {
         PlayerMovement();
+
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            ShootBomb();
+        }
         
         if (Input.GetKey(KeyCode.R)) 
         {
@@ -36,6 +48,17 @@ public class Player : MonoBehaviour
         }    
     }
 
+    void ShootHomingMissile()
+    {
+        Instantiate(missile, transform.position, Quaternion.identity);
+        hasRun = true;
+    }
+
+    void ShootBomb()
+    {
+        Instantiate(bombPrefab, transform.position, Quaternion.identity, bombsTransform);
+    }
+
     void PlayerMovement()
     {
         float acceleration = maxSpeed / accelerationTime;
@@ -46,33 +69,51 @@ public class Player : MonoBehaviour
             speed = maxSpeed;
         }
 
-        Vector3 upVel = new Vector3(0, speed);
-        Vector3 downVel = new Vector3(0, -speed);
-        Vector3 leftVel = new Vector3(-speed, 0);
-        Vector3 rightVel = new Vector3(speed, 0);
+        Vector3 upVel = new Vector3(0, 1);
+        Vector3 downVel = new Vector3(0, -1);
+        Vector3 leftVel = new Vector3(-1, 0);
+        Vector3 rightVel = new Vector3(1, 0);
 
-        if (Input.GetKey(KeyCode.UpArrow))
+        bool isMoving = false;
+
+        Debug.Log(lastDirection);
+
+        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
         {
             speed += acceleration * Time.deltaTime;
-            transform.position += upVel * Time.deltaTime;
+            transform.position += upVel * speed * Time.deltaTime;
+            lastDirection = upVel;
+            isMoving = true;
         }
-        if (Input.GetKey(KeyCode.DownArrow))
+        if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
         {
             speed += acceleration * Time.deltaTime;
-            transform.position += downVel * Time.deltaTime;
+            transform.position += downVel * speed * Time.deltaTime;
+            lastDirection = downVel;
+            isMoving = true;
         }
-        if (Input.GetKey(KeyCode.LeftArrow))
+        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
         {
             speed += acceleration * Time.deltaTime;
-            transform.position += leftVel * Time.deltaTime;
+            transform.position += leftVel * speed * Time.deltaTime;
+            lastDirection = leftVel;
+            isMoving = true;
         }
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
         {
             speed += acceleration * Time.deltaTime;
-            transform.position += rightVel * Time.deltaTime;
+            transform.position += rightVel * speed * Time.deltaTime;
+            lastDirection = rightVel;
+            isMoving = true;
+        }
+        if (!isMoving && speed > 0)
+        {
+            speed -= deceleration * Time.deltaTime;
+            if (speed < 0) speed = 0;
+
+            transform.position += lastDirection * speed * Time.deltaTime;
         }
 
-        //Debug.Log(speed);
     }
 
     public void EnemyRadar(float radius, int circlePoints)
@@ -85,6 +126,16 @@ public class Player : MonoBehaviour
         if (distanceToEnemy <= radius)
         {
             radarColor = Color.red;
+
+            if (hasRun == false)
+            {
+                ShootHomingMissile();
+            }
+            
+        }
+        else
+        {
+            hasRun = false;
         }
 
         float angle = 360f / circlePoints;
